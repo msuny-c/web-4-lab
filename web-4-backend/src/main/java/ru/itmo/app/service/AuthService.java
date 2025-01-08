@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import ru.itmo.app.dto.UserDTO;
 import ru.itmo.app.model.UserModel;
 import ru.itmo.app.repository.UserRepository;
+import ru.itmo.app.util.PasswordUtil;
 
 @Stateless
 public class AuthService {
@@ -25,13 +26,23 @@ public class AuthService {
                        .build()
             );
         }
-        UserModel userModel = UserModel.builder().username(user.getUsername()).password(user.getPassword()).build();
+        String salt = PasswordUtil.generateSalt();
+        String hashedPassword = PasswordUtil.hashPassword(user.getPassword(), salt);
+        
+        UserModel userModel = UserModel.builder()
+            .username(user.getUsername())
+            .password(hashedPassword)
+            .salt(salt)
+            .build();
+            
         userRepository.save(userModel);
         String token = jwtService.createToken(user.getUsername());
         return token;
     }
+
     public String signIn(UserDTO user) {
-        if (!userRepository.existsByUsername(user.getUsername())) {
+        UserModel userModel = userRepository.findByUsername(user.getUsername());
+        if (userModel == null) {
             throw new WebApplicationException(
                 Response.status(Response.Status.NOT_FOUND)
                        .entity("{\"error\": \"User not found\"}")
@@ -39,6 +50,16 @@ public class AuthService {
                        .build()
             );
         }
+
+        if (!PasswordUtil.verifyPassword(user.getPassword(), userModel.getSalt(), userModel.getPassword())) {
+            throw new WebApplicationException(
+                Response.status(Response.Status.UNAUTHORIZED)
+                       .entity("{\"error\": \"Invalid password\"}")
+                       .type(MediaType.APPLICATION_JSON)
+                       .build()
+            );
+        }
+
         String token = jwtService.createToken(user.getUsername());
         return token;
     }

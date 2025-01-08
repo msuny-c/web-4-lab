@@ -26,4 +26,6 @@ public class UserModel {
     private String username;
     @Column(name = "password")
     private String password;
+    @Column(name = "salt")
+    private String salt;
 }
