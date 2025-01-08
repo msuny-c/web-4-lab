@@ -95,14 +95,14 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
 
   const drawAreas = (ctx: CanvasRenderingContext2D) => {
     const center = size / 2;
-    const scale = (size - 2 * padding) / 2; // Scale for fixed areas (using unit R=1)
+    const scale = (size - 2 * padding) / 2.4; // Scale for fixed areas, slightly smaller to extend axes
 
     ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
     
     // Draw quarter circle in first quadrant (x >= 0, y >= 0)
     ctx.beginPath();
-    ctx.arc(center, center, scale / 2, 0, Math.PI / 2);
-    ctx.lineTo(center, center);
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, scale / 2, -Math.PI / 2, 0, false);
     ctx.closePath();
     ctx.fill();
     
@@ -140,7 +140,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
 
   const drawPoints = (ctx: CanvasRenderingContext2D) => {
     const center = size / 2;
-    const scale = (size - 2 * padding) / 2; // Base scale for unit coordinates
+    const scale = (size - 2 * padding) / 2.4; // Use the same scale as areas
 
     points.forEach(point => {
       // Scale the point coordinates relative to current R
@@ -165,7 +165,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     const y = event.clientY - rect.top;
     
     const center = size / 2;
-    const scale = (size - 2 * padding) / 2; // Base scale for unit coordinates
+    const scale = (size - 2 * padding) / 2.4; // Use the same scale as areas
     
     // Get coordinates in unit scale (-1 to 1)
     const unitX = (x - center) / scale;
