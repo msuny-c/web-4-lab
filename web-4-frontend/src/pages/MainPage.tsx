@@ -26,6 +26,7 @@ import { checkPointAsync, getAllPointsAsync } from '../store/slices/pointsSlice'
 import type { RootState } from '../store/store';
 import type { AppDispatch } from '../store/store';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AreaCanvas from '../components/AreaCanvas';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -108,6 +109,16 @@ function MainPage() {
     return !isNaN(num) && num >= -3 && num <= 5;
   };
 
+  const handleCanvasClick = (x: number, y: number) => {
+    if (r) {
+      dispatch(checkPointAsync({
+        x: Number(x.toFixed(2)),
+        y: Number(y.toFixed(2)),
+        r: parseFloat(r),
+      }));
+    }
+  };
+
   return (
     <Fade in timeout={800}>
       <StyledContainer>
@@ -135,7 +146,22 @@ function MainPage() {
           </Alert>
         )}
 
-        <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { md: '350px 1fr' } }}>
+        <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { md: '1fr 1fr' } }}>
+          <StyledPaper>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Typography variant="h6">
+                Area Visualization
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <AreaCanvas
+                  points={points}
+                  currentR={r ? parseFloat(r) : null}
+                  onPointClick={handleCanvasClick}
+                />
+              </Box>
+            </Box>
+          </StyledPaper>
+
           <StyledPaper>
             <Box component="form" onSubmit={handleSubmit}>
               <Typography variant="h6" sx={{ mb: 3 }}>
@@ -217,7 +243,7 @@ function MainPage() {
             </Box>
           </StyledPaper>
 
-          <StyledPaper>
+          <StyledPaper sx={{ gridColumn: '1 / -1' }}>
             <Typography variant="h6" sx={{ mb: 3 }}>
               Results History
             </Typography>
