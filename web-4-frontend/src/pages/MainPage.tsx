@@ -89,7 +89,6 @@ function MainPage() {
         })).unwrap();
         setX(null);
         setY('');
-        setR(null);
       } catch (err) {
         if (err instanceof Error && err.message === 'Session expired. Please login again.') {
           dispatch(logout());
