@@ -99,20 +99,20 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
 
     ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
     
-    // Draw circle in first quadrant (quarter of circle)
+    // Draw quarter circle in first quadrant (x >= 0, y >= 0)
     ctx.beginPath();
     ctx.arc(center, center, r * scale / 2, 0, Math.PI / 2);
     ctx.lineTo(center, center);
     ctx.closePath();
     ctx.fill();
     
-    // Draw rectangle in second quadrant
+    // Draw rectangle in second quadrant (x <= 0, y >= 0)
     ctx.fillRect(center - r * scale, center - r * scale / 2, r * scale, r * scale / 2);
     
-    // Draw triangle in fourth quadrant
+    // Draw triangle in third quadrant (x <= 0, y <= 0)
     ctx.beginPath();
     ctx.moveTo(center, center);
-    ctx.lineTo(center + r * scale / 2, center);
+    ctx.lineTo(center - r * scale, center);
     ctx.lineTo(center, center + r * scale);
     ctx.closePath();
     ctx.fill();
