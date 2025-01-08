@@ -1,11 +1,30 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 
+// Constants
+const CANVAS_CONFIG = {
+  SIZE: 400,
+  PADDING: 40,
+  AXIS_MARGIN: 5,
+  POINT_RADIUS: 4,
+  SCALE_FACTOR: 2.4,
+} as const;
+
+const COLORS = {
+  GRID: '#ddd',
+  AREA: 'rgba(0, 0, 255, 0.2)',
+  SUCCESS: '#4CAF50',
+  ERROR: '#f44336',
+  AXIS: '#000',
+} as const;
+
+// Styled Components
 const Canvas = styled('canvas')({
   border: '1px solid #ccc',
   borderRadius: '4px',
 });
 
+// Types
 interface Point {
   x: number;
   y: number;
@@ -19,56 +38,55 @@ interface AreaCanvasProps {
   onPointClick?: (x: number, y: number) => void;
 }
 
+// Utility functions
+const getCenter = () => CANVAS_CONFIG.SIZE / 2;
+const getScale = () => (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / CANVAS_CONFIG.SCALE_FACTOR;
+
 const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const size = 400;
-  const padding = 40;
-  const axisMargin = 5;
 
-  const drawGrid = (ctx: CanvasRenderingContext2D) => {
+  const drawGrid = useCallback((ctx: CanvasRenderingContext2D) => {
     ctx.beginPath();
-    ctx.strokeStyle = '#ddd';
+    ctx.strokeStyle = COLORS.GRID;
     ctx.lineWidth = 0.5;
 
-    // Draw vertical grid lines
-    for (let x = padding; x <= size - padding; x += (size - 2 * padding) / 10) {
-      ctx.moveTo(x, padding);
-      ctx.lineTo(x, size - padding);
-    }
-
-    // Draw horizontal grid lines
-    for (let y = padding; y <= size - padding; y += (size - 2 * padding) / 10) {
-      ctx.moveTo(padding, y);
-      ctx.lineTo(size - padding, y);
+    const step = (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 10;
+    for (let i = CANVAS_CONFIG.PADDING; i <= CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING; i += step) {
+      // Vertical lines
+      ctx.moveTo(i, CANVAS_CONFIG.PADDING);
+      ctx.lineTo(i, CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING);
+      // Horizontal lines
+      ctx.moveTo(CANVAS_CONFIG.PADDING, i);
+      ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, i);
     }
 
     ctx.stroke();
-  };
+  }, []);
 
   const drawAxis = (ctx: CanvasRenderingContext2D) => {
-    const center = size / 2;
+    const center = getCenter();
     ctx.beginPath();
-    ctx.strokeStyle = '#000';
+    ctx.strokeStyle = COLORS.AXIS;
     ctx.lineWidth = 2;
     
     // X axis
-    ctx.moveTo(padding, center);
-    ctx.lineTo(size - padding, center);
+    ctx.moveTo(CANVAS_CONFIG.PADDING, center);
+    ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, center);
     
     // Y axis
-    ctx.moveTo(center, size - padding);
-    ctx.lineTo(center, padding);
+    ctx.moveTo(center, CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING);
+    ctx.lineTo(center, CANVAS_CONFIG.PADDING);
     
     // Arrows
-    ctx.moveTo(size - padding, center);
-    ctx.lineTo(size - padding - axisMargin, center - axisMargin);
-    ctx.moveTo(size - padding, center);
-    ctx.lineTo(size - padding - axisMargin, center + axisMargin);
+    ctx.moveTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, center);
+    ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING - CANVAS_CONFIG.AXIS_MARGIN, center - CANVAS_CONFIG.AXIS_MARGIN);
+    ctx.moveTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, center);
+    ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING - CANVAS_CONFIG.AXIS_MARGIN, center + CANVAS_CONFIG.AXIS_MARGIN);
     
-    ctx.moveTo(center, padding);
-    ctx.lineTo(center - axisMargin, padding + axisMargin);
-    ctx.moveTo(center, padding);
-    ctx.lineTo(center + axisMargin, padding + axisMargin);
+    ctx.moveTo(center, CANVAS_CONFIG.PADDING);
+    ctx.lineTo(center - CANVAS_CONFIG.AXIS_MARGIN, CANVAS_CONFIG.PADDING + CANVAS_CONFIG.AXIS_MARGIN);
+    ctx.moveTo(center, CANVAS_CONFIG.PADDING);
+    ctx.lineTo(center + CANVAS_CONFIG.AXIS_MARGIN, CANVAS_CONFIG.PADDING + CANVAS_CONFIG.AXIS_MARGIN);
     
     ctx.stroke();
 
@@ -80,24 +98,24 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
       const r = currentR;
 
       // X axis labels
-      ctx.fillText(`${r}`, center + (size - 2 * padding) / 2, center + 20);
-      ctx.fillText(`${r/2}`, center + (size - 2 * padding) / 4, center + 20);
-      ctx.fillText(`-${r}`, center - (size - 2 * padding) / 2, center + 20);
-      ctx.fillText(`-${r/2}`, center - (size - 2 * padding) / 4, center + 20);
+      ctx.fillText(`${r}`, center + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 2, center + 20);
+      ctx.fillText(`${r/2}`, center + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4, center + 20);
+      ctx.fillText(`-${r}`, center - (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 2, center + 20);
+      ctx.fillText(`-${r/2}`, center - (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4, center + 20);
 
       // Y axis labels
-      ctx.fillText(`${r}`, center - 20, padding + (size - 2 * padding) / 8);
-      ctx.fillText(`${r/2}`, center - 20, center - (size - 2 * padding) / 4);
-      ctx.fillText(`-${r}`, center - 20, size - padding);
-      ctx.fillText(`-${r/2}`, center - 20, center + (size - 2 * padding) / 4);
+      ctx.fillText(`${r}`, center - 20, CANVAS_CONFIG.PADDING + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 8);
+      ctx.fillText(`${r/2}`, center - 20, center - (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4);
+      ctx.fillText(`-${r}`, center - 20, CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING);
+      ctx.fillText(`-${r/2}`, center - 20, center + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4);
     }
   };
 
   const drawAreas = (ctx: CanvasRenderingContext2D) => {
-    const center = size / 2;
-    const scale = (size - 2 * padding) / 2.4; // Scale for fixed areas, slightly smaller to extend axes
+    const center = getCenter();
+    const scale = getScale();
 
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
+    ctx.fillStyle = COLORS.AREA;
     
     // Draw quarter circle in first quadrant (x >= 0, y >= 0)
     ctx.beginPath();
@@ -122,8 +140,8 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
       const pointX = center + x * scale;
       const pointY = center - y * scale;
       ctx.beginPath();
-      ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
-      ctx.fillStyle = '#000';
+      ctx.arc(pointX, pointY, CANVAS_CONFIG.POINT_RADIUS, 0, 2 * Math.PI);
+      ctx.fillStyle = COLORS.AXIS;
       ctx.fill();
     };
 
@@ -139,8 +157,8 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
   };
 
   const drawPoints = (ctx: CanvasRenderingContext2D) => {
-    const center = size / 2;
-    const scale = (size - 2 * padding) / 2.4; // Use the same scale as areas
+    const center = getCenter();
+    const scale = getScale();
 
     points.forEach(point => {
       // Scale the point coordinates relative to current R
@@ -151,8 +169,8 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
       const y = center - scaledY * scale;
 
       ctx.beginPath();
-      ctx.arc(x, y, 4, 0, 2 * Math.PI);
-      ctx.fillStyle = point.result ? '#4CAF50' : '#f44336';
+      ctx.arc(x, y, CANVAS_CONFIG.POINT_RADIUS, 0, 2 * Math.PI);
+      ctx.fillStyle = point.result ? COLORS.SUCCESS : COLORS.ERROR;
       ctx.fill();
     });
   };
@@ -164,8 +182,8 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     
-    const center = size / 2;
-    const scale = (size - 2 * padding) / 2.4; // Use the same scale as areas
+    const center = getCenter();
+    const scale = getScale();
     
     // Get coordinates in unit scale (-1 to 1)
     const unitX = (x - center) / scale;
@@ -186,7 +204,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     if (!ctx) return;
 
     // Clear canvas
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, CANVAS_CONFIG.SIZE, CANVAS_CONFIG.SIZE);
 
     // Draw components
     drawGrid(ctx);
@@ -200,8 +218,8 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
   return (
     <Canvas
       ref={canvasRef}
-      width={size}
-      height={size}
+      width={CANVAS_CONFIG.SIZE}
+      height={CANVAS_CONFIG.SIZE}
       onClick={handleCanvasClick}
     />
   );

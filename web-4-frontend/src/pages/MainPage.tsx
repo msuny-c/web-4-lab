@@ -4,21 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
-  TextField,
-  Button,
   Typography,
   Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Autocomplete,
-  Alert,
-  CircularProgress,
-  Fade,
   IconButton,
+  Alert,
+  Fade,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { logout } from '../store/slices/authSlice';
@@ -27,7 +17,10 @@ import type { RootState } from '../store/store';
 import type { AppDispatch } from '../store/store';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AreaCanvas from '../components/AreaCanvas';
+import PointForm from '../components/PointForm';
+import ResultsTable from '../components/ResultsTable';
 
+// Styled Components
 const StyledContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(4),
   paddingBottom: theme.spacing(4),
@@ -46,20 +39,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const AnimatedTableRow = styled(TableRow)(({ theme }) => ({
-  transition: 'background-color 0.2s ease',
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-const xOptions = ['-3', '-2', '-1', '0', '1', '2', '3', '4', '5'];
-const rOptions = ['1', '2', '3', '4', '5'];
-
 function MainPage() {
-  const [x, setX] = useState<string | null>(null);
-  const [y, setY] = useState('');
-  const [r, setR] = useState<string | null>(null);
+  const [selectedR, setSelectedR] = useState<string | null>(null);
   const { points, loading, error } = useSelector((state: RootState) => state.points);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -78,43 +59,29 @@ function MainPage() {
     fetchPoints();
   }, [dispatch, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (x && y && r) {
-      try {
-        await dispatch(checkPointAsync({
-          x: parseFloat(x),
-          y: parseFloat(y),
-          r: parseFloat(r),
-        })).unwrap();
-        setX(null);
-        setY('');
-      } catch (err) {
-        if (err instanceof Error && err.message === 'Session expired. Please login again.') {
-          dispatch(logout());
-          navigate('/');
-        }
-      }
-    }
-  };
-
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
   };
 
-  const validateY = (value: string) => {
-    const num = parseFloat(value);
-    return !isNaN(num) && num >= -3 && num <= 5;
+  const handlePointSubmit = async (x: number, y: number, r: number) => {
+    try {
+      await dispatch(checkPointAsync({ x, y, r })).unwrap();
+    } catch (err) {
+      if (err instanceof Error && err.message === 'Session expired. Please login again.') {
+        dispatch(logout());
+        navigate('/');
+      }
+    }
   };
 
   const handleCanvasClick = (x: number, y: number) => {
-    if (r) {
-      dispatch(checkPointAsync({
-        x: Number(x.toFixed(2)),
-        y: Number(y.toFixed(2)),
-        r: parseFloat(r),
-      }));
+    if (selectedR) {
+      handlePointSubmit(
+        Number(x.toFixed(2)),
+        Number(y.toFixed(2)),
+        parseFloat(selectedR)
+      );
     }
   };
 
@@ -154,7 +121,7 @@ function MainPage() {
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <AreaCanvas
                   points={points}
-                  currentR={r ? parseFloat(r) : null}
+                  currentR={selectedR ? parseFloat(selectedR) : null}
                   onPointClick={handleCanvasClick}
                 />
               </Box>
@@ -162,123 +129,18 @@ function MainPage() {
           </StyledPaper>
 
           <StyledPaper>
-            <Box component="form" onSubmit={handleSubmit}>
-              <Typography variant="h6" sx={{ mb: 3 }}>
-                Enter Coordinates
-              </Typography>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Autocomplete
-                  options={xOptions}
-                  value={x}
-                  onChange={(_, newValue) => setX(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="X Coordinate"
-                      required
-                      disabled={loading}
-                    />
-                  )}
-                />
-                
-                <TextField
-                  label="Y Coordinate"
-                  type="number"
-                  value={y}
-                  onChange={(e) => setY(e.target.value)}
-                  error={y !== '' && !validateY(y)}
-                  helperText={y !== '' && !validateY(y) ? 'Y must be between -3 and 5' : ''}
-                  required
-                  disabled={loading}
-                  inputProps={{
-                    step: 'any',
-                    min: -3,
-                    max: 5,
-                  }}
-                />
-                
-                <Autocomplete
-                  options={rOptions}
-                  value={r}
-                  onChange={(_, newValue) => setR(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Radius"
-                      required
-                      disabled={loading}
-                    />
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  sx={{
-                    mt: 1,
-                    height: 48,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress
-                      size={24}
-                      sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        marginTop: '-12px',
-                        marginLeft: '-12px',
-                      }}
-                    />
-                  ) : (
-                    'Check Point'
-                  )}
-                </Button>
-              </Box>
-            </Box>
+            <PointForm
+              loading={loading}
+              onSubmit={handlePointSubmit}
+              onRChange={setSelectedR}
+            />
           </StyledPaper>
 
           <StyledPaper sx={{ gridColumn: '1 / -1' }}>
             <Typography variant="h6" sx={{ mb: 3 }}>
               Results History
             </Typography>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>X</TableCell>
-                    <TableCell>Y</TableCell>
-                    <TableCell>R</TableCell>
-                    <TableCell>Result</TableCell>
-                    <TableCell>Timestamp</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {points.map((point, index) => (
-                    <AnimatedTableRow key={index}>
-                      <TableCell>{point.x}</TableCell>
-                      <TableCell>{point.y}</TableCell>
-                      <TableCell>{point.r}</TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{
-                            color: point.result ? 'success.main' : 'error.main',
-                            fontWeight: 500,
-                          }}
-                        >
-                          {point.result ? 'Hit' : 'Miss'}
-                        </Box>
-                      </TableCell>
-                      <TableCell>{new Date(point.timestamp).toLocaleString()}</TableCell>
-                    </AnimatedTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <ResultsTable points={points} />
           </StyledPaper>
         </Box>
       </StyledContainer>
