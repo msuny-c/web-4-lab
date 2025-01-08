@@ -93,7 +93,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     }
   };
 
-  const drawAreas = (ctx: CanvasRenderingContext2D, r: number) => {
+  const drawAreas = (ctx: CanvasRenderingContext2D) => {
     const center = size / 2;
     const scale = (size - 2 * padding) / (2 * 5); // 5 is the max coordinate value
 
@@ -101,21 +101,43 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     
     // Draw quarter circle in first quadrant (x >= 0, y >= 0)
     ctx.beginPath();
-    ctx.arc(center, center, r * scale / 2, 0, Math.PI / 2);
+    ctx.arc(center, center, 5 * scale / 2, 0, Math.PI / 2);
     ctx.lineTo(center, center);
     ctx.closePath();
     ctx.fill();
     
     // Draw rectangle in second quadrant (x <= 0, y >= 0)
-    ctx.fillRect(center - r * scale, center - r * scale / 2, r * scale, r * scale / 2);
+    ctx.fillRect(center - 5 * scale, center - 5 * scale / 2, 5 * scale, 5 * scale / 2);
     
     // Draw triangle in third quadrant (x <= 0, y <= 0)
     ctx.beginPath();
     ctx.moveTo(center, center);
-    ctx.lineTo(center - r * scale, center);
-    ctx.lineTo(center, center + r * scale);
+    ctx.lineTo(center - 5 * scale, center);
+    ctx.lineTo(center, center + 5 * scale);
     ctx.closePath();
     ctx.fill();
+
+    // Draw reference points
+    const drawReferencePoint = (x: number, y: number) => {
+      const pointX = center + x * scale;
+      const pointY = center - y * scale;
+      ctx.beginPath();
+      ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
+      ctx.fillStyle = '#000';
+      ctx.fill();
+    };
+
+    // Draw points at -R, R, -R/2, R/2
+    if (currentR) {
+      drawReferencePoint(-currentR, 0); // -R on X axis
+      drawReferencePoint(currentR, 0);  // R on X axis
+      drawReferencePoint(-currentR/2, 0); // -R/2 on X axis
+      drawReferencePoint(currentR/2, 0);  // R/2 on X axis
+      drawReferencePoint(0, -currentR); // -R on Y axis
+      drawReferencePoint(0, currentR);  // R on Y axis
+      drawReferencePoint(0, -currentR/2); // -R/2 on Y axis
+      drawReferencePoint(0, currentR/2);  // R/2 on Y axis
+    }
   };
 
   const drawPoints = (ctx: CanvasRenderingContext2D) => {
@@ -123,14 +145,8 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     const scale = (size - 2 * padding) / (2 * 5);
 
     points.forEach(point => {
-      // Scale point coordinates according to current R value
-      if (!currentR) return;
-      const scaleFactor = currentR / point.r;
-      const scaledX = point.x * scaleFactor;
-      const scaledY = point.y * scaleFactor;
-
-      const x = center + scaledX * scale;
-      const y = center - scaledY * scale;
+      const x = center + point.x * scale;
+      const y = center - point.y * scale;
 
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
@@ -169,7 +185,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     drawGrid(ctx);
     drawAxis(ctx);
     if (currentR) {
-      drawAreas(ctx, currentR);
+      drawAreas(ctx);
     }
     drawPoints(ctx);
   }, [points, currentR]);
