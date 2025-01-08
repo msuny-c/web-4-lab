@@ -54,7 +54,7 @@ const AnimatedTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 const xOptions = ['-3', '-2', '-1', '0', '1', '2', '3', '4', '5'];
-const rOptions = ['-3', '-2', '-1', '0', '1', '2', '3', '4', '5'];
+const rOptions = ['1', '2', '3', '4', '5'];
 
 function MainPage() {
   const [x, setX] = useState<string | null>(null);
