@@ -112,13 +112,13 @@ function LoginPage() {
               Student Information
             </Typography>
             <Typography variant={isMobile ? 'body2' : 'body1'} sx={{ color: 'text.secondary' }}>
-              Name: Your Name
+              Name: Munir Bairamgulov
             </Typography>
             <Typography variant={isMobile ? 'body2' : 'body1'} sx={{ color: 'text.secondary' }}>
-              Group: P3214
+              Group: P3218
             </Typography>
             <Typography variant={isMobile ? 'body2' : 'body1'} sx={{ color: 'text.secondary' }}>
-              Variant: 1234
+              Variant: 8748
             </Typography>
           </Box>
           
