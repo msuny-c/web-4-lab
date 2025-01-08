@@ -80,7 +80,7 @@ function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (mode === 'register' && (!validateUsername(username) || !validatePassword(password))) {
+      if (!validateUsername(username) || !validatePassword(password)) {
         return;
       }
       if (mode === 'login') {
@@ -153,8 +153,8 @@ function LoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               required
               disabled={loading}
-              error={mode === 'register' && username.length > 0 && !validateUsername(username)}
-              helperText={mode === 'register' && username.length > 0 && !validateUsername(username) ? 'Username must be at least 5 characters long' : ''}
+              error={username.length > 0 && !validateUsername(username)}
+              helperText={username.length > 0 && !validateUsername(username) ? 'Username must be at least 5 characters long' : ''}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -167,15 +167,15 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              error={mode === 'register' && password.length > 0 && !validatePassword(password)}
-              helperText={mode === 'register' && password.length > 0 && !validatePassword(password) ? 'Password must be at least 6 characters long' : ''}
+              error={password.length > 0 && !validatePassword(password)}
+              helperText={password.length > 0 && !validatePassword(password) ? 'Password must be at least 6 characters long' : ''}
               sx={{ mb: 3 }}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              disabled={loading || (mode === 'register' && (!validateUsername(username) || !validatePassword(password)))}
+              disabled={loading || !validateUsername(username) || !validatePassword(password)}
               sx={{
                 height: 48,
                 position: 'relative',
