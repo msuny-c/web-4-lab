@@ -99,7 +99,7 @@ function LoginPage() {
       <Container maxWidth="sm">
         <StyledPaper elevation={0}>
           <Header variant="h4">
-            Point Checker
+            Web programming
           </Header>
           
           <Box sx={{ 

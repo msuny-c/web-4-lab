@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
+// Анимированная строка таблицы
 const AnimatedTableRow = styled(TableRow)(({ theme }) => ({
   transition: 'background-color 0.2s ease',
   '&:hover': {
@@ -16,6 +17,7 @@ const AnimatedTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
+// Типы данных
 interface Point {
   x: number;
   y: number;

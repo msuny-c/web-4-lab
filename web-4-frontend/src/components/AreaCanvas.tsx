@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 
-// Constants
+// Константы
 const CANVAS_CONFIG = {
   SIZE: 400,
   PADDING: 40,
@@ -18,13 +18,13 @@ const COLORS = {
   AXIS: '#000',
 } as const;
 
-// Styled Components
+// Стилизованные компоненты
 const Canvas = styled('canvas')({
   border: '1px solid #ccc',
   borderRadius: '4px',
 });
 
-// Types
+// Типы
 interface Point {
   x: number;
   y: number;
@@ -38,7 +38,7 @@ interface AreaCanvasProps {
   onPointClick?: (x: number, y: number) => void;
 }
 
-// Utility functions
+// Вспомогательные функции
 const getCenter = () => CANVAS_CONFIG.SIZE / 2;
 const getScale = () => (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / CANVAS_CONFIG.SCALE_FACTOR;
 
@@ -52,10 +52,10 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
 
     const step = (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 10;
     for (let i = CANVAS_CONFIG.PADDING; i <= CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING; i += step) {
-      // Vertical lines
+      // Вертикальные линии
       ctx.moveTo(i, CANVAS_CONFIG.PADDING);
       ctx.lineTo(i, CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING);
-      // Horizontal lines
+      // Горизонтальные линии
       ctx.moveTo(CANVAS_CONFIG.PADDING, i);
       ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, i);
     }
@@ -69,15 +69,15 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     ctx.strokeStyle = COLORS.AXIS;
     ctx.lineWidth = 2;
     
-    // X axis
+    // Ось X
     ctx.moveTo(CANVAS_CONFIG.PADDING, center);
     ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, center);
     
-    // Y axis
+    // Ось Y
     ctx.moveTo(center, CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING);
     ctx.lineTo(center, CANVAS_CONFIG.PADDING);
     
-    // Arrows
+    // Стрелки
     ctx.moveTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, center);
     ctx.lineTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING - CANVAS_CONFIG.AXIS_MARGIN, center - CANVAS_CONFIG.AXIS_MARGIN);
     ctx.moveTo(CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING, center);
@@ -90,20 +90,20 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     
     ctx.stroke();
 
-    // Add labels if R is set
+    // Добавляем метки, если R установлен
     if (currentR) {
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const r = currentR;
 
-      // X axis labels
+      // Метки оси X
       ctx.fillText(`${r}`, center + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 2, center + 20);
       ctx.fillText(`${r/2}`, center + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4, center + 20);
       ctx.fillText(`-${r}`, center - (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 2, center + 20);
       ctx.fillText(`-${r/2}`, center - (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4, center + 20);
 
-      // Y axis labels
+      // Метки оси Y
       ctx.fillText(`${r}`, center - 20, CANVAS_CONFIG.PADDING + (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 8);
       ctx.fillText(`${r/2}`, center - 20, center - (CANVAS_CONFIG.SIZE - 2 * CANVAS_CONFIG.PADDING) / 4);
       ctx.fillText(`-${r}`, center - 20, CANVAS_CONFIG.SIZE - CANVAS_CONFIG.PADDING);
@@ -117,17 +117,17 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
 
     ctx.fillStyle = COLORS.AREA;
     
-    // Draw quarter circle in first quadrant (x >= 0, y >= 0)
+    // Рисуем четверть круга в первом квадранте (x >= 0, y >= 0)
     ctx.beginPath();
     ctx.moveTo(center, center);
     ctx.arc(center, center, scale / 2, -Math.PI / 2, 0, false);
     ctx.closePath();
     ctx.fill();
     
-    // Draw rectangle in second quadrant (x <= 0, y >= 0)
+    // Рисуем прямоугольник во втором квадранте (x <= 0, y >= 0)
     ctx.fillRect(center - scale, center - scale / 2, scale, scale / 2);
     
-    // Draw triangle in third quadrant (x <= 0, y <= 0)
+    // Рисуем треугольник в третьем квадранте (x <= 0, y <= 0)
     ctx.beginPath();
     ctx.moveTo(center, center);
     ctx.lineTo(center - scale, center);
@@ -135,7 +135,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     ctx.closePath();
     ctx.fill();
 
-    // Draw fixed reference points at unit coordinates
+    // Рисуем фиксированные опорные точки в единичных координатах
     const drawReferencePoint = (x: number, y: number) => {
       const pointX = center + x * scale;
       const pointY = center - y * scale;
@@ -145,15 +145,15 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
       ctx.fill();
     };
 
-    // Draw points at ±1 and ±0.5 (fixed positions)
-    drawReferencePoint(-1, 0);  // -R position
-    drawReferencePoint(1, 0);   // R position
-    drawReferencePoint(-0.5, 0); // -R/2 position
-    drawReferencePoint(0.5, 0);  // R/2 position
-    drawReferencePoint(0, -1);  // -R position
-    drawReferencePoint(0, 1);   // R position
-    drawReferencePoint(0, -0.5); // -R/2 position
-    drawReferencePoint(0, 0.5);  // R/2 position
+    // Рисуем точки в позициях ±1 и ±0.5
+    drawReferencePoint(-1, 0);  // позиция -R
+    drawReferencePoint(1, 0);   // позиция R
+    drawReferencePoint(-0.5, 0); // позиция -R/2
+    drawReferencePoint(0.5, 0);  // позиция R/2
+    drawReferencePoint(0, -1);  // позиция -R
+    drawReferencePoint(0, 1);   // позиция R
+    drawReferencePoint(0, -0.5); // позиция -R/2
+    drawReferencePoint(0, 0.5);  // позиция R/2
   };
 
   const drawPoints = (ctx: CanvasRenderingContext2D) => {
@@ -161,7 +161,7 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     const scale = getScale();
 
     points.forEach(point => {
-      // Scale the point coordinates relative to current R
+      // Масштабируем координаты точки относительно текущего R
       const scaledX = point.x / (currentR || 1);
       const scaledY = point.y / (currentR || 1);
       
@@ -185,11 +185,11 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     const center = getCenter();
     const scale = getScale();
     
-    // Get coordinates in unit scale (-1 to 1)
+    // Получаем координаты в единичном масштабе (-1 до 1)
     const unitX = (x - center) / scale;
     const unitY = (center - y) / scale;
     
-    // Scale coordinates according to current R
+    // Масштабируем координаты в соответствии с текущим R
     const coordX = unitX * currentR;
     const coordY = unitY * currentR;
     
@@ -203,10 +203,9 @@ const AreaCanvas = ({ points, currentR, onPointClick }: AreaCanvasProps) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear canvas
     ctx.clearRect(0, 0, CANVAS_CONFIG.SIZE, CANVAS_CONFIG.SIZE);
 
-    // Draw components
+    // Рисуем компоненты
     drawGrid(ctx);
     drawAxis(ctx);
     if (currentR) {

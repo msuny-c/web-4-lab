@@ -8,9 +8,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+// Опции для координат
 const X_OPTIONS = ['-3', '-2', '-1', '0', '1', '2', '3', '4', '5'];
 const R_OPTIONS = ['1', '2', '3', '4', '5'];
 
+// Типы пропсов
 interface PointFormProps {
   loading: boolean;
   onSubmit: (x: number, y: number, r: number) => void;
@@ -18,15 +20,18 @@ interface PointFormProps {
 }
 
 const PointForm = ({ loading, onSubmit, onRChange }: PointFormProps) => {
+  // Состояния для координат и радиуса
   const [x, setX] = useState<string | null>(null);
   const [y, setY] = useState('');
   const [r, setR] = useState<string | null>(null);
 
+  // Проверка валидности координаты Y
   const validateY = (value: string) => {
     const num = parseFloat(value);
     return !isNaN(num) && num >= -3 && num <= 5;
   };
 
+  // Обработчик отправки формы
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (x && y && r) {
@@ -36,6 +41,7 @@ const PointForm = ({ loading, onSubmit, onRChange }: PointFormProps) => {
     }
   };
 
+  // Обработчик изменения радиуса
   const handleRChange = (newValue: string | null) => {
     setR(newValue);
     onRChange(newValue);
